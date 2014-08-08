@@ -48,6 +48,10 @@ int main(int argc, char *argv[])
 		usage();
 	}
 
+	if (*dev == '\0') {
+		usage();
+	}
+
 	do_debug("%s \n", dev);
 
 	return 0;
