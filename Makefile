@@ -7,10 +7,10 @@ CFLAGS = -Wall -g
 LDFLAGS = -lpcap
 
 vap_agent: $(OBJECTS)
-	$(CC) -o vap_agent -L$(LB_PATH) -I$(INC_PATH) $(OBJECTS) $(LDFLAGS)
+	$(CC) -o vap-agent -L$(LB_PATH) -I$(INC_PATH) $(OBJECTS) $(LDFLAGS)
 
 .c.o:
 	$(CC) $(CFLAGS) -I$(INC_PATH) -c $*.c
 
 clean:
-	rm $(OBJECTS)
+	rm $(OBJECTS) vap-agent
