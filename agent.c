@@ -16,7 +16,37 @@ void usage()
 
 void process_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const u_char *pkt)
 {
+	u_int8_t hlen;
+
 	do_debug("Received packet size: %d\n", pkthdr->len);
+	
+	if (pkthdr->len >= 24) {
+		hlen = pkt[2] + (pkt[3] << 8);
+
+		switch (pkt[hlen]) {
+			case 0x00:
+				do_debug("Recdived frame type is association request\n");	
+				break;
+			case 0x10:
+				do_debug("Recdived frame type is association response\n");	
+				break;
+			case 0x40:
+				do_debug("Recdived frame type is probe request\n");	
+				break;
+			case 0x50:
+				do_debug("Recdived frame type is probe response\n");	
+				break;
+			case 0x80:
+				do_debug("Recdived frame type is beacon\n");	
+				break;
+			case 0xB0:
+				do_debug("Recdived frame type is authentication\n");	
+				break;
+			default:
+				do_debug("Unknown frame type\n");
+				break;
+		}
+	}
 }
 
 int main(int argc, char *argv[])
