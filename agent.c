@@ -10,7 +10,13 @@ void usage()
 	fprintf(stderr, "Usage:\n");
 	fprintf(stderr, "vap-agent -i <ifacename>\n");
 	fprintf(stderr, "-d: outputs debug infomation while running\n");
+	fprintf(stderr, "-h: output this usage\n");
 	exit(1);
+}
+
+void process_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const u_char *pkt)
+{
+	do_debug("Received packet size: %d\n", pkthdr->len);
 }
 
 int main(int argc, char *argv[])
@@ -19,8 +25,6 @@ int main(int argc, char *argv[])
 	char dev[DEVSIZE] = "";
 	pcap_t *ppcap = NULL;
 	char errbuf[PCAP_ERRBUF_SIZE];
-	unsigned char buf[500];
-	int ret, sockStatus = 0;
 
 	if (argc <= 1) {
 		my_err("Too few options\n");
@@ -56,7 +60,7 @@ int main(int argc, char *argv[])
 		usage();
 	}
 
-	do_debug("%s \n", dev);
+	do_debug("Creating socket at %s \n", dev);
 
 	// open interface in pcap
 	ppcap = pcap_open_live(dev, 800, 1, 20, errbuf);
@@ -72,21 +76,15 @@ int main(int argc, char *argv[])
 	}
 
 	// set nonblock mode
-	pcap_setnonblock(ppcap, 1, errbuf);
-	
-	memset(buf, 0, sizeof(buf));
-
-	while (!sockStatus) {
-		struct pcap_pkthdr * ppcapPacketHeader = NULL;
-        
-		// receive
-        ret = pcap_next_ex(ppcap, &ppcapPacketHeader, (const u_char**)&buf);
-
-		if (ret < 0) {
-            sockStatus = 1;
-            continue;
-        }
+	if (pcap_setnonblock(ppcap, 1, errbuf) == -1) {
+		my_err("Device %s doesn't set non-blocking mode\n", dev);
+		return -1;
 	}
+	
+	// fall into pcap loop
+	pcap_loop(ppcap, -1, process_packet,NULL);
 
+	pcap_close(ppcap);
+	
 	return 0;
 }
