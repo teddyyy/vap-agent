@@ -94,10 +94,10 @@ int main(int argc, char *argv[])
 
 	// open interface in pcap
 	ppcap = pcap_open_live(dev, 800, 1, 20, errbuf);
-    if (ppcap == NULL) {
-        my_err("Unable to open interface %s in pcap: %s\n", dev, errbuf);
-        return -1;
-    }   
+	if (ppcap == NULL) {
+		my_err("Unable to open interface %s in pcap: %s\n", dev, errbuf);
+		return -1;
+	}    
 
 	// check data link type
 	if (pcap_datalink(ppcap) != DLT_IEEE802_11_RADIO) {
