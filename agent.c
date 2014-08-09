@@ -6,9 +6,7 @@ extern void my_err(char *msg, ...);
 
 typedef struct  {
     int m_nChannel;
-    int m_nChannelFlags;
     int m_nRate;
-    int m_nRadiotapFlags;
 	int8_t m_ndBmsignal;
 	int8_t m_ndBmnoise;
 } __attribute__((packed)) PENUMBRA_RADIOTAP_DATA;
@@ -32,41 +30,15 @@ void process_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const u_char
 	int bytes, n;
 	PENUMBRA_RADIOTAP_DATA prd;
 	struct ieee80211_radiotap_iterator rti;
+	const u_char *rtpkt = pkt;
 
-	hlen = pkt[2] + (pkt[3] << 8);
-	nlen = hlen;
-
-	if (pkthdr->len >= 24) {
-
-		switch (pkt[nlen]) {
-			case 0x00:
-				do_debug("Recdived frame type is association request\n");	
-				break;
-			case 0x10:
-				do_debug("Recdived frame type is association response\n");	
-				break;
-			case 0x40:
-				do_debug("Recdived frame type is probe request\n");	
-				break;
-			case 0x50:
-				do_debug("Recdived frame type is probe response\n");	
-				break;
-			case 0x80:
-				do_debug("Recdived frame type is beacon\n");	
-				break;
-			case 0xB0:
-				do_debug("Recdived frame type is authentication\n");	
-				break;
-			default:
-				do_debug("Unknown frame type\n");
-				break;
-		}
-	}
-
+	// extract radiotap headder
 	// based on packetspammer by andy green
+	hlen = rtpkt[2] + (rtpkt[3] << 8);
+	
 	bytes = pkthdr->len - (hlen + n80211HeaderLength);
 
-	ieee80211_radiotap_iterator_init(&rti, (struct ieee80211_radiotap_header *)pkt, bytes);
+	ieee80211_radiotap_iterator_init(&rti, (struct ieee80211_radiotap_header *)rtpkt, bytes);
 
 	while ((n = ieee80211_radiotap_iterator_next(&rti)) == 0) {
 
@@ -77,13 +49,8 @@ void process_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const u_char
 
             case IEEE80211_RADIOTAP_CHANNEL:
                 prd.m_nChannel = le16_to_cpu(*((u16 *)rti.this_arg));
-                prd.m_nChannelFlags = le16_to_cpu(*((u16 *)(rti.this_arg + 2)));
                 break;
-
-            case IEEE80211_RADIOTAP_FLAGS:
-                prd.m_nRadiotapFlags = (*rti.this_arg);
-                break;
-
+			
 			case IEEE80211_RADIOTAP_DBM_ANTSIGNAL:
 				prd.m_ndBmsignal = (*rti.this_arg);
 				break;
@@ -95,13 +62,45 @@ void process_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const u_char
             }
 	}
 
-	do_debug("RX: Rate: %2d.%dMbps, Freq: %dMHz, Flags: 0x%X	",
-            prd.m_nRate / 2, 5 * (prd.m_nRate & 1),
-            prd.m_nChannel,
-            prd.m_nRadiotapFlags);
-	do_debug("signal: %ddBm	noise:  %ddBm\n", prd.m_ndBmsignal, prd.m_ndBmnoise);
+	do_debug("RX: Rate: %2d.%dMbps, Freq: %dMHz, Signal:% ddBm, Noise: %ddBm	",
+            prd.m_nRate / 2, 5 * (prd.m_nRate & 1), prd.m_nChannel,prd.m_ndBmsignal, prd.m_ndBmnoise);
 
-		
+	// extract 802.11 header
+	if (pkthdr->len >= 24) {
+		nlen = pkt[2] + (pkt[3] << 8);
+		switch (pkt[nlen]) {
+		case 0x00:
+			do_debug("Recdived frame type is association request\n");	
+			break;
+		case 0x10:
+			do_debug("Recdived frame type is association response\n");	
+			break;
+		case 0x40:
+			do_debug("Recdived frame type is probe request\n");	
+			break;
+		case 0x50:
+			do_debug("Recdived frame type is probe response\n");	
+			break;
+		case 0x80:
+			do_debug("Recdived frame type is beacon\n");	
+			break;
+		case 0xB0:
+			do_debug("Recdived frame type is authentication\n");	
+			break;
+		case 0xD4:
+			do_debug("Recdived frame type is ack\n");	
+			break;
+		case 0x08:
+			do_debug("Recdived frame type is data\n");	
+			break;
+		case 0x48:
+			do_debug("Recdived frame type is null\n");	
+			break;
+		default:
+			do_debug("Unknown frame type is %x\n", pkt[nlen]);
+			break;
+		}
+	}
 }
 
 int main(int argc, char *argv[])

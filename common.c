@@ -12,7 +12,7 @@ void do_debug(char *msg, ...)
 
     if (debug) {
         va_start(args, msg);
-        vfprintf(stderr, msg, args);
+        vfprintf(stdout, msg, args);
         va_end(args);
     }
 }
