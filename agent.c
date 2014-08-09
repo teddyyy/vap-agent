@@ -22,7 +22,7 @@ void usage()
 	exit(1);
 }
 
-void bssid_found(const u_char *bssid)
+void ether_ntoa_r(const u_char *bssid)
 {
     printf("%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx ",
         bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
@@ -32,11 +32,11 @@ void print_mgmt_header(const u_char *pkt,
             u_int8_t pos1, u_int8_t pos2, u_int8_t pos3)
 {
     printf("DA:");
-    bssid_found(pkt + pos1);
+    ether_ntoa_r(pkt + pos1);
     printf("SA:");
-    bssid_found(pkt + pos2);
+    ether_ntoa_r(pkt + pos2);
     printf("BSSID:");
-    bssid_found(pkt + pos3);
+    ether_ntoa_r(pkt + pos3);
 }
 
 
