@@ -22,9 +22,27 @@ void usage()
 	exit(1);
 }
 
+void bssid_found(const u_char *bssid)
+{
+    printf("%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx ",
+        bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
+}
+
+void print_mgmt_header(const u_char *pkt, 
+            u_int8_t pos1, u_int8_t pos2, u_int8_t pos3)
+{
+    printf("DA:");
+    bssid_found(pkt + pos1);
+    printf("SA:");
+    bssid_found(pkt + pos2);
+    printf("BSSID:");
+    bssid_found(pkt + pos3);
+}
+
+
 void process_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const u_char *pkt)
 {
-	u16 hlen;
+	u16 hlen, pos1, pos2, pos3;
 	u_int8_t nlen;
 	int n80211HeaderLength = 0x18;
 	int bytes, n;
@@ -68,24 +86,41 @@ void process_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const u_char
 	// extract 802.11 header
 	if (pkthdr->len >= 24) {
 		nlen = pkt[2] + (pkt[3] << 8);
+
+		pos1 = hlen + 4;
+        pos2 = hlen + 10; 
+        pos3 = hlen + 16; 
+
 		switch (pkt[nlen]) {
 		case 0x00:
-			do_debug("Recdived frame type is association request\n");	
+			do_debug("Recdived frame type is association request ");
+			print_mgmt_header(pkt, pos1, pos2 ,pos3);
+			do_debug("\n");
 			break;
 		case 0x10:
-			do_debug("Recdived frame type is association response\n");	
+			do_debug("Recdived frame type is association response ");	
+			print_mgmt_header(pkt, pos1, pos2 ,pos3);
+			do_debug("\n");
 			break;
 		case 0x40:
-			do_debug("Recdived frame type is probe request\n");	
+			do_debug("Recdived frame type is probe request ");	
+			print_mgmt_header(pkt, pos1, pos2 ,pos3);
+			do_debug("\n");
 			break;
 		case 0x50:
-			do_debug("Recdived frame type is probe response\n");	
+			do_debug("Recdived frame type is probe response ");	
+			print_mgmt_header(pkt, pos1, pos2 ,pos3);
+			do_debug("\n");
 			break;
 		case 0x80:
-			do_debug("Recdived frame type is beacon\n");	
+			do_debug("Recdived frame type is beacon ");	
+			print_mgmt_header(pkt, pos1, pos2 ,pos3);
+			do_debug("\n");
 			break;
 		case 0xB0:
-			do_debug("Recdived frame type is authentication\n");	
+			do_debug("Recdived frame type is authentication ");	
+			print_mgmt_header(pkt, pos1, pos2 ,pos3);
+			do_debug("\n");
 			break;
 		case 0xD4:
 			do_debug("Recdived frame type is ack\n");	
