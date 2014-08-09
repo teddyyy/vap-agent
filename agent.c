@@ -50,7 +50,7 @@ void process_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const u_char
             case IEEE80211_RADIOTAP_CHANNEL:
                 prd.m_nChannel = le16_to_cpu(*((u16 *)rti.this_arg));
                 break;
-			
+	
 			case IEEE80211_RADIOTAP_DBM_ANTSIGNAL:
 				prd.m_ndBmsignal = (*rti.this_arg);
 				break;
