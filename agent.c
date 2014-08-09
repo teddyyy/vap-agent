@@ -63,6 +63,7 @@ void process_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const u_char
 		}
 	}
 
+	// based on packetspammer by andy green
 	bytes = pkthdr->len - (hlen + n80211HeaderLength);
 
 	ieee80211_radiotap_iterator_init(&rti, (struct ieee80211_radiotap_header *)pkt, bytes);
@@ -94,16 +95,12 @@ void process_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const u_char
             }
 	}
 
-	printf("RX: Rate: %2d.%dMbps, Freq: %dMHz, Flags: 0x%X	",
+	do_debug("RX: Rate: %2d.%dMbps, Freq: %dMHz, Flags: 0x%X	",
             prd.m_nRate / 2, 5 * (prd.m_nRate & 1),
             prd.m_nChannel,
             prd.m_nRadiotapFlags);
-	printf("signal: %ddBm	noise:  %ddBm\n", prd.m_ndBmsignal, prd.m_ndBmnoise);
+	do_debug("signal: %ddBm	noise:  %ddBm\n", prd.m_ndBmsignal, prd.m_ndBmnoise);
 
-/*	
-	if (pkthdr->len >= 24) {
-		hlen = pkt[2] + (pkt[3] << 8);
-*/
 		
 }
 
