@@ -3,17 +3,12 @@
 
 extern void do_debug(char *msg, ...);
 extern void my_err(char *msg, ...);
-
-typedef struct  {
-    int m_nChannel;
-    int m_nRate;
-	int8_t m_ndBmsignal;
-	int8_t m_ndBmnoise;
-} __attribute__((packed)) PENUMBRA_RADIOTAP_DATA;
+extern void print_mgmt_header(const u_char *pkt,
+            u_int8_t pos1, u_int8_t pos2, u_int8_t pos3);
 
 int debug = 0;
 
-void usage()
+static void usage()
 {
 	fprintf(stderr, "Usage:\n");
 	fprintf(stderr, "vap-agent -i <ifacename>\n");
@@ -22,25 +17,7 @@ void usage()
 	exit(1);
 }
 
-void ether_ntoa_r(const u_char *bssid)
-{
-    printf("%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx ",
-        bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
-}
-
-void print_mgmt_header(const u_char *pkt, 
-            u_int8_t pos1, u_int8_t pos2, u_int8_t pos3)
-{
-    printf("DA:");
-    ether_ntoa_r(pkt + pos1);
-    printf("SA:");
-    ether_ntoa_r(pkt + pos2);
-    printf("BSSID:");
-    ether_ntoa_r(pkt + pos3);
-}
-
-
-void process_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const u_char *pkt)
+static void process_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const u_char *pkt)
 {
 	u16 hlen, pos1, pos2, pos3;
 	u_int8_t nlen;

@@ -6,7 +6,24 @@
 
 #include "agent.h"
 
-void do_debug(char *msg, ...)
+static void ether_ntoa_r(const u_char *bssid)
+{
+    printf("%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx ",                                                                                  
+        bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
+}
+
+extern void print_mgmt_header(const u_char *pkt, 
+            u_int8_t pos1, u_int8_t pos2, u_int8_t pos3)
+{
+    printf("DA:");
+    ether_ntoa_r(pkt + pos1);
+    printf("SA:");
+    ether_ntoa_r(pkt + pos2);
+    printf("BSSID:");
+    ether_ntoa_r(pkt + pos3);
+}
+
+extern void do_debug(char *msg, ...)
 {
     va_list args;
 
@@ -17,14 +34,14 @@ void do_debug(char *msg, ...)
     }
 }
 
-void do_perror(char *msg)
+extern void do_perror(char *msg)
 {
     if (debug) {
         fprintf(stderr, "%s : %s\n", msg, strerror(errno));
     }
 }
 
-void my_err(char *msg, ...)                                                                          
+extern void my_err(char *msg, ...)                                                                          
 {
     va_list args;
     
