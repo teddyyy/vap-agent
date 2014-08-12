@@ -1,5 +1,6 @@
 #include "agent.h"
 #include "radiotap.h"
+#include "ieee802_11.h"
 
 extern void do_debug(char *msg, ...);
 extern void my_err(char *msg, ...);
@@ -21,7 +22,7 @@ static void process_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const
 {
 	u16 hlen, pos1, pos2, pos3;
 	u_int8_t nlen;
-	int n80211HeaderLength = 0x18;
+	int n80211HeaderLength = HEADERLENGTH;
 	int bytes, n;
 	PENUMBRA_RADIOTAP_DATA prd;
 	struct ieee80211_radiotap_iterator rti;

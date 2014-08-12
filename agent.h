@@ -7,6 +7,7 @@
 #include <endian.h>
 
 #define DEVSIZE 16
+#define HEADERLENGTH 0x18
 extern int debug;
 
 typedef unsigned int u32;
