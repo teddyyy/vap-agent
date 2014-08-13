@@ -1,6 +1,6 @@
 #include "agent.h"
 #include "radiotap.h"
-#include "ieee802_11.h"
+#include "analyse.h"
 
 extern void do_debug(char *msg, ...);
 extern void my_err(char *msg, ...);
@@ -13,12 +13,12 @@ static void usage()
 {
 	fprintf(stderr, "Usage:\n");
 	fprintf(stderr, "vap-agent -i <ifacename>\n");
-	fprintf(stderr, "-d: outputs debug infomation while running\n");
+	fprintf(stderr, "-v: outputs debug infomation while running\n");
 	fprintf(stderr, "-h: output this usage\n");
 	exit(1);
 }
 
-static void process_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const u_char *pkt)
+static void handle_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const u_char *pkt)
 {
 	u16 hlen, pos1, pos2, pos3;
 	u_int8_t nlen;
@@ -114,6 +114,8 @@ static void process_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const
 			break;
 		}
 	}
+
+	// extract 802.11 frame body
 }
 
 int main(int argc, char *argv[])
@@ -128,7 +130,7 @@ int main(int argc, char *argv[])
 		usage();
 	}
 
-	while ((opt = getopt(argc, argv, "hi:d")) > 0) {
+	while ((opt = getopt(argc, argv, "hi:v")) > 0) {
 		switch(opt) {
 			case 'h':
 				usage();
@@ -136,7 +138,7 @@ int main(int argc, char *argv[])
 			case 'i':
 				strncpy(dev, optarg, DEVSIZE - 1);
 				break;
-			case 'd':
+			case 'v':
 				debug = 1;
 				break;
 			default:
@@ -179,7 +181,7 @@ int main(int argc, char *argv[])
 	}
 	
 	// fall into pcap loop
-	pcap_loop(ppcap, -1, process_packet,NULL);
+	pcap_loop(ppcap, -1, handle_packet,NULL);
 
 	pcap_close(ppcap);
 	

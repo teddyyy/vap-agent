@@ -14,3 +14,6 @@ vap_agent: $(OBJECTS)
 
 clean:
 	rm $(OBJECTS) vap-agent
+
+cp:
+	scp vap-agent root@203.178.143.205:
