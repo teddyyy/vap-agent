@@ -1,6 +1,5 @@
 #include "agent.h"
 #include "radiotap.h"
-#include "analyse.h"
 
 extern void do_debug(char *msg, ...);
 extern void my_err(char *msg, ...);
@@ -24,7 +23,7 @@ static void handle_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const 
 	u16 hlen, pos1, pos2, pos3, b_pos;
 	u_int8_t nlen;
 	int n80211HeaderLength = HEADERLENGTH;
-	int bytes, n;
+	int bytes, n, ssid = 0;
 	PENUMBRA_RADIOTAP_DATA prd;
 	struct ieee80211_radiotap_iterator rti;
 	const u_char *rtpkt = pkt;
@@ -79,22 +78,26 @@ static void handle_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const 
 		case 0x10:
 			do_debug("Recdived frame type is association response ");	
 			print_mgmt_header(pkt, pos1, pos2 ,pos3);
-			do_debug("\n");
+			b_pos = nlen + 30;
+			ssid = 1;
 			break;
 		case 0x40:
 			do_debug("Recdived frame type is probe request ");	
 			print_mgmt_header(pkt, pos1, pos2 ,pos3);
-			do_debug("\n");
+			b_pos = nlen + 24;
+			ssid = 1;
 			break;
 		case 0x50:
 			do_debug("Recdived frame type is probe response ");	
 			print_mgmt_header(pkt, pos1, pos2 ,pos3);
-			do_debug("\n");
+			b_pos = nlen + 36;
+			ssid = 1;
 			break;
 		case 0x80:
 			do_debug("Recdived frame type is beacon ");	
 			print_mgmt_header(pkt, pos1, pos2 ,pos3);
-			do_debug("\n");
+			b_pos = nlen + 36;
+			ssid = 1;
 			break;
 		case 0xB0:
 			do_debug("Recdived frame type is authentication ");	
@@ -117,9 +120,8 @@ static void handle_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const 
 	}
 
 	// extract ssid from 802.11 frame body
-	b_pos = nlen + 36;
-	essid_print(pkt + b_pos);
-
+	if (ssid)
+		essid_print(pkt + b_pos);
 }
 
 int main(int argc, char *argv[])

@@ -20,6 +20,8 @@ void essid_print(const u_char *d)
 			printf("%c", d[i]);
 		}
 		printf("\n");
+	} else {
+		printf("()\n");
 	}
 }
 
