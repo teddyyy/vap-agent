@@ -14,7 +14,6 @@ void essid_print(const u_char *d)
 	int len, i = 2;
 
 	if (d[0] == SSIDPARAM && d[1] != SSIDLENGTH) {
-		printf("length:%d ", d[1]);
 		len = d[1];		
 		for (i = 2; i <= len + 1; i++) {
 			printf("%c", d[i]);

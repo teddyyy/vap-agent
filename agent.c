@@ -61,7 +61,7 @@ static void handle_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const 
 	do_debug("RX: Rate: %2d.%dMbps, Freq: %dMHz, Signal:% ddBm, Noise: %ddBm	",
             prd.m_nRate / 2, 5 * (prd.m_nRate & 1), prd.m_nChannel,prd.m_ndBmsignal, prd.m_ndBmnoise);
 
-	// extract 802.11 header
+	// extract subtype from 802.11 header
 	if (pkthdr->len >= 24) {
 		nlen = pkt[2] + (pkt[3] << 8);
 
