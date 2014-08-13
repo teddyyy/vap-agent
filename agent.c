@@ -6,6 +6,7 @@ extern void do_debug(char *msg, ...);
 extern void my_err(char *msg, ...);
 extern void print_mgmt_header(const u_char *pkt,
             u_int8_t pos1, u_int8_t pos2, u_int8_t pos3);
+extern void essid_print (const u_char *d);
 
 int debug = 0;
 
@@ -20,7 +21,7 @@ static void usage()
 
 static void handle_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const u_char *pkt)
 {
-	u16 hlen, pos1, pos2, pos3;
+	u16 hlen, pos1, pos2, pos3, b_pos;
 	u_int8_t nlen;
 	int n80211HeaderLength = HEADERLENGTH;
 	int bytes, n;
@@ -65,9 +66,9 @@ static void handle_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const 
 	if (pkthdr->len >= 24) {
 		nlen = pkt[2] + (pkt[3] << 8);
 
-		pos1 = hlen + 4;
-        pos2 = hlen + 10; 
-        pos3 = hlen + 16; 
+		pos1 = nlen + 4;
+        pos2 = nlen + 10; 
+        pos3 = nlen + 16; 
 
 		switch (pkt[nlen]) {
 		case 0x00:
@@ -115,7 +116,10 @@ static void handle_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const 
 		}
 	}
 
-	// extract 802.11 frame body
+	// extract ssid from 802.11 frame body
+	b_pos = nlen + 36;
+	essid_print(pkt + b_pos);
+
 }
 
 int main(int argc, char *argv[])
