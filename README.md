@@ -1,3 +1,5 @@
+vap-agent
+==========
 Source files for vap-agent 
 Author: KIMOTO Mizuki <teddy@sfc.wide.ad.jp>
 
@@ -7,11 +9,11 @@ Vap-agent plays station assoc management role. Data frame forward to controller.
 INSTALL
 ======
 
-# make 
+	# make 
 
 HOW TO USE
 ======
 
-# ./vap-agent -i <interface>
+	# ./vap-agent -i <interface>
     		-v: outputs debug infomation while running
     		-h: output this usage
