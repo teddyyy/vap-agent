@@ -65,9 +65,9 @@ static void handle_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const 
 	if (pkthdr->len >= 24) {
 		nlen = pkt[2] + (pkt[3] << 8);
 
-		pos1 = nlen + 4;
-        pos2 = nlen + 10; 
-        pos3 = nlen + 16; 
+		pos1 = nlen + 4; // frame control + Duration ID
+        pos2 = nlen + 10; // frame control + Duration ID + Address 1
+        pos3 = nlen + 16; // frame control + Duration ID + Address 1 + Address 2
 
 		switch (pkt[nlen]) {
 		case 0x00:
