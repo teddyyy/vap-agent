@@ -1,5 +1,6 @@
 #include "agent.h"
 #include "radiotap.h"
+#include "frame.h"
 
 extern void do_debug(char *msg, ...);
 extern void my_err(char *msg, ...);

@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <pcap.h>
 #include <endian.h>
+#include <stdint.h>
 
 #define DEVSIZE 16
 #define HEADERLENGTH 0x18

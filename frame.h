@@ -1,5 +1,5 @@
-#define	IEEE802_11_TSTAMP_LEN		8  /* Timestamp */
-#define SSID_MAXLEN 				32
+#define	IEEE802_11_TSTAMP_LEN	8 
+#define SSID_MAXLEN				32
 
 struct radiotapHeader {
     uint16_t version;
@@ -13,7 +13,7 @@ struct radiotapHeader {
     uint8_t noise;
     uint8_t ant;
 } __attribute__((packed));
-                                                                                                                                       
+
 struct ieee80211Header {
     uint16_t fc; 
     uint16_t duration;
