@@ -2,14 +2,6 @@
 #include "radiotap.h"
 #include "frame.h"
 
-extern void do_debug(char *msg, ...);
-extern void my_err(char *msg, ...);
-extern void print_mgmt_header(const u_char *pkt,
-            u_int8_t pos1, u_int8_t pos2, u_int8_t pos3);
-extern void essid_print (const u_char *d);
-extern pcap_t* create_recv_dev(char *dev);
-extern pcap_t* create_send_dev(char *dev);
-
 int debug = 0;
 
 static void usage()
@@ -127,13 +119,113 @@ static void handle_packet(u_char *argc, const struct pcap_pkthdr *pkthdr, const 
 		essid_print(pkt + b_pos);
 }
 
+void* frame_monitor(void* dev)
+{
+	pcap_t *rpcap = NULL;
+	rpcap = create_recv_dev(dev);
+
+	do_debug("Creating frame monitor\n");
+	pcap_loop(rpcap, -1, handle_packet, NULL);
+
+	pcap_close(rpcap);
+
+	return 0;
+}
+
+void* frame_inject(void* dev)
+{
+	int r, total;
+	u_char *p;
+	u_char buf[sizeof(struct radiotapHeader) 
+				+ sizeof(struct ieee80211Header) 
+				+ sizeof(struct beaconBody)];
+
+	struct radiotapHeader rth = {
+		.version = 0x0000,
+		.hlen = 0x1900,
+		.bitmap = 0x6f080000,
+		.timestamp = 0x0000000000000000,
+		.flags = 0x00,
+		.rate = 0x6c,
+		.channel = 0x8509c000,
+		.signal = 0xde,
+		.noise = 0x00,
+		.ant = 0x01,
+	};
+
+	struct ieee80211Header i80211h = {
+		.fc = 0x8000,
+		.duration = 0x0000,
+		.da[0] = 0xff,
+		.da[1] = 0xff,
+		.da[2] = 0xff,
+		.da[3] = 0xff,
+		.da[4] = 0xff,
+		.da[5] = 0xff,
+		.sa[0] = 0x4c,
+		.sa[1] = 0xe6,
+		.sa[2] = 0x76,
+		.sa[3] = 0xf9,
+		.sa[4] = 0xa0,
+		.sa[5] = 0x51,
+		.bssid[0] = 0x4c,
+		.bssid[1] = 0xe6,
+		.bssid[2] = 0x76,
+		.bssid[3] = 0xf9,
+		.bssid[4] = 0xa0,
+		.bssid[5] = 0x51,
+		.seq = 0x1086,
+	};
+
+	struct beaconBody bbody = {
+		.timestamp[0] = 0x0000000000000000,
+		.interval = 0x6600,
+		.capinfo = 0x2100,
+		.ssid_parm = 0x00,
+		.ssid_len = 0x04,
+		.ssid[0] = 0x68,
+		.ssid[1] = 0x6f,
+		.ssid[2] = 0x67,
+		.ssid[3] = 0x65,
+		.rate_parm = 0x01,
+		.rate_len = 0x01,
+		.rate[0] = 0x8c,
+	};
+
+	pcap_t *spcap = NULL;
+	spcap = create_send_dev(dev);
+
+	memset(buf, 0, sizeof(buf));
+
+	p = buf;
+
+	memcpy(p, &rth, sizeof(struct radiotapHeader));
+	p += sizeof(struct radiotapHeader);
+	memcpy(p, &i80211h, sizeof(struct ieee80211Header));
+	p += sizeof(struct ieee80211Header);
+	memcpy(p, &bbody, sizeof(struct beaconBody));
+	p += sizeof(struct beaconBody);
+	total = p - buf;
+
+	while (1) {
+		r = pcap_inject(spcap, buf, total);
+		if (r == -1) {
+			return -1;
+		}
+		sleep(1);
+	}
+
+	pcap_close(spcap);
+
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	int opt;
 	char dev[DEVSIZE] = "";
-	pcap_t *rpcap = NULL;
-	pcap_t *spcap = NULL;
-
+	pthread_t th1, th2;
+	
 	if (argc <= 1) {
 		my_err("Too few options\n");
 		usage();
@@ -168,16 +260,12 @@ int main(int argc, char *argv[])
 		usage();
 	}
 
-	do_debug("Creating socket at %s \n", dev);
+	// fall into pthread 
+	pthread_create(&th1, NULL, frame_monitor, (void*)&dev);
+	pthread_create(&th2, NULL, frame_inject, (void*)&dev);
 
-	rpcap = create_recv_dev(dev);
-	spcap = create_send_dev(dev);
-
-	// receive frame on monitor interface
-	pcap_loop(rpcap, -1, handle_packet, NULL);
-
-	pcap_close(rpcap);
-	pcap_close(spcap);
+	pthread_join(th1, NULL);
+	pthread_join(th2, NULL);
 	
 	return 0;
 }

@@ -7,9 +7,19 @@
 #include <pcap.h>
 #include <endian.h>
 #include <stdint.h>
+#include <pthread.h>
 
 #define DEVSIZE 16
 #define HEADERLENGTH 0x18
+
+extern void do_debug(char *msg, ...);
+extern void my_err(char *msg, ...);
+extern void print_mgmt_header(const u_char *pkt,
+            u_int8_t pos1, u_int8_t pos2, u_int8_t pos3);
+extern void essid_print (const u_char *d);
+extern pcap_t* create_recv_dev(char *dev);
+extern pcap_t* create_send_dev(char *dev);
+
 extern int debug;
 
 typedef unsigned int u32;
