@@ -7,6 +7,8 @@ extern void my_err(char *msg, ...);
 extern void print_mgmt_header(const u_char *pkt,
             u_int8_t pos1, u_int8_t pos2, u_int8_t pos3);
 extern void essid_print (const u_char *d);
+extern pcap_t* create_recv_dev(char *dev);
+extern pcap_t* create_send_dev(char *dev);
 
 int debug = 0;
 
@@ -129,8 +131,8 @@ int main(int argc, char *argv[])
 {
 	int opt;
 	char dev[DEVSIZE] = "";
-	pcap_t *ppcap = NULL;
-	char errbuf[PCAP_ERRBUF_SIZE];
+	pcap_t *rpcap = NULL;
+	pcap_t *spcap = NULL;
 
 	if (argc <= 1) {
 		my_err("Too few options\n");
@@ -168,29 +170,14 @@ int main(int argc, char *argv[])
 
 	do_debug("Creating socket at %s \n", dev);
 
-	// open interface in pcap
-	ppcap = pcap_open_live(dev, 800, 1, 20, errbuf);
-	if (ppcap == NULL) {
-		my_err("Unable to open interface %s in pcap: %s\n", dev, errbuf);
-		return -1;
-	}    
+	rpcap = create_recv_dev(dev);
+	spcap = create_send_dev(dev);
 
-	// check data link type
-	if (pcap_datalink(ppcap) != DLT_IEEE802_11_RADIO) {
-		my_err("Device %s doesn't provide 802.11 Radiotap haders\n", dev);
-		return -1;
-	}
+	// receive frame on monitor interface
+	pcap_loop(rpcap, -1, handle_packet, NULL);
 
-	// set nonblock mode
-	if (pcap_setnonblock(ppcap, 1, errbuf) == -1) {
-		my_err("Device %s doesn't set non-blocking mode\n", dev);
-		return -1;
-	}
-	
-	// fall into pcap loop
-	pcap_loop(ppcap, -1, handle_packet,NULL);
-
-	pcap_close(ppcap);
+	pcap_close(rpcap);
+	pcap_close(spcap);
 	
 	return 0;
 }

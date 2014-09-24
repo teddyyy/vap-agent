@@ -1,6 +1,6 @@
 CC = mips-openwrt-linux-gcc
 
-OBJECTS = agent.o common.o radiotap.o
+OBJECTS = agent.o common.o radiotap.o pcap.o
 INC_PATH = /home/teddy/trunk/staging_dir/target-mips_34kc_uClibc-0.9.33.2/usr/include/
 LB_PATH = /home/teddy/trunk/staging_dir/target-mips_34kc_uClibc-0.9.33.2/usr/lib/
 CFLAGS = -Wall -g

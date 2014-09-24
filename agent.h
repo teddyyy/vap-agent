@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdarg.h>
 #include <pcap.h>
 #include <endian.h>
 #include <stdint.h>
