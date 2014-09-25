@@ -136,28 +136,26 @@ void* frame_inject(void* dev)
 {
 	int total;
 	u_char *p;
-	//u_char buf[sizeof(struct ieee80211Header) + sizeof(struct beaconBody)];
-
 	u_char buf[sizeof(struct radiotapHeader) 
 				+ sizeof(struct ieee80211Header) 
 				+ sizeof(struct beaconBody)];
 
 	struct radiotapHeader rth = {
-		.version = 0x0000,
-		.hlen = 0x1900,
-		.bitmap = 0x6f080000,
-		.timestamp = 0x0000000000000000,
-		.flags = 0x00,
-		.rate = 0x6c,
-		.channel = 0x8509c000,
-		.signal = 0xde,
-		.noise = 0x00,
-		.ant = 0x01,
+		.version = RTAP_VERSION,
+		.hlen = RTAP_HLEN,
+		.bitmap = RTAP_BITMAP,
+		.timestamp = RTAP_TIMESTAMP,
+		.flags = RTAP_FLAGS,
+		.rate = RTAP_RATE,
+		.channel = RTAP_CHANNEL,
+		.signal = RTAP_SIGNAL,
+		.noise = RTAP_NOISE,
+		.ant = RTAP_ANT,
 	};
 
 	struct ieee80211Header i80211h = {
 		.fc = 0x8000,
-		.duration = 0x0000,
+		.duration = IEEEHEADER_DURATION,
 		.da[0] = 0x00,
 		.da[1] = 0x1f,
 		.da[2] = 0x5b,
@@ -176,22 +174,22 @@ void* frame_inject(void* dev)
 		.bssid[3] = 0xf9,
 		.bssid[4] = 0xa0,
 		.bssid[5] = 0x51,
-		.seq = 0x1086,
+		.seq = IEEEHEADER_SEQ,
 	};
 
 	struct beaconBody bbody = {
-		.timestamp = 0x0000000000000000,
-		.interval = 0x6600,
-		.capinfo = 0x2100,
-		.ssid_parm = 0x00,
+		.timestamp = BEACON_TIMESTAMP,
+		.interval = BEACON_INTERVAL,
+		.capinfo = BEACON_CAPINFO,
+		.ssid_parm = BEACON_SSID_PARM,
 		.ssid_len = 0x04,
 		.ssid[0] = 0x68,
 		.ssid[1] = 0x6f,
 		.ssid[2] = 0x67,
 		.ssid[3] = 0x65,
-		.rate_parm = 0x01,
-		.rate_len = 0x08,
-		.rate = 0x8c129824b048606c,
+		.rate_parm = BEACON_RATE_PARM,
+		.rate_len = BEACON_RATE_LEN,
+		.rate = BEACON_RATE,
 	};
 
 	pcap_t *spcap = NULL;
