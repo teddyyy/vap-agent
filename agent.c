@@ -134,8 +134,10 @@ void* frame_monitor(void* dev)
 
 void* frame_inject(void* dev)
 {
-	int r, total;
+	int total;
 	u_char *p;
+	//u_char buf[sizeof(struct ieee80211Header) + sizeof(struct beaconBody)];
+
 	u_char buf[sizeof(struct radiotapHeader) 
 				+ sizeof(struct ieee80211Header) 
 				+ sizeof(struct beaconBody)];
@@ -156,12 +158,12 @@ void* frame_inject(void* dev)
 	struct ieee80211Header i80211h = {
 		.fc = 0x8000,
 		.duration = 0x0000,
-		.da[0] = 0xff,
-		.da[1] = 0xff,
-		.da[2] = 0xff,
-		.da[3] = 0xff,
-		.da[4] = 0xff,
-		.da[5] = 0xff,
+		.da[0] = 0x00,
+		.da[1] = 0x1f,
+		.da[2] = 0x5b,
+		.da[3] = 0xcb,
+		.da[4] = 0xe8,
+		.da[5] = 0xbe,
 		.sa[0] = 0x4c,
 		.sa[1] = 0xe6,
 		.sa[2] = 0x76,
@@ -178,7 +180,7 @@ void* frame_inject(void* dev)
 	};
 
 	struct beaconBody bbody = {
-		.timestamp[0] = 0x0000000000000000,
+		.timestamp = 0x0000000000000000,
 		.interval = 0x6600,
 		.capinfo = 0x2100,
 		.ssid_parm = 0x00,
@@ -188,8 +190,8 @@ void* frame_inject(void* dev)
 		.ssid[2] = 0x67,
 		.ssid[3] = 0x65,
 		.rate_parm = 0x01,
-		.rate_len = 0x01,
-		.rate[0] = 0x8c,
+		.rate_len = 0x08,
+		.rate = 0x8c129824b048606c,
 	};
 
 	pcap_t *spcap = NULL;
@@ -205,14 +207,12 @@ void* frame_inject(void* dev)
 	p += sizeof(struct ieee80211Header);
 	memcpy(p, &bbody, sizeof(struct beaconBody));
 	p += sizeof(struct beaconBody);
+
 	total = p - buf;
 
 	while (1) {
-		r = pcap_inject(spcap, buf, total);
-		if (r == -1) {
-			return -1;
-		}
-		sleep(1);
+ 		pcap_inject(spcap, buf, total);
+		sleep(0.1);
 	}
 
 	pcap_close(spcap);

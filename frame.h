@@ -1,5 +1,5 @@
 #define	IEEE802_11_TSTAMP_LEN	8 
-#define SSID_MAXLEN				32
+#define SSID_MAXLEN				4
 
 struct radiotapHeader {
     uint16_t version;
@@ -24,13 +24,13 @@ struct ieee80211Header {
 } __attribute__((packed));
 
 struct beaconBody {
-	uint8_t timestamp[IEEE802_11_TSTAMP_LEN];	
+	uint64_t timestamp;	
 	uint16_t interval;
 	uint16_t capinfo;
 	uint8_t ssid_parm;
 	uint8_t ssid_len;
-	u_char ssid[SSID_MAXLEN + 1];
+	u_char ssid[SSID_MAXLEN];
 	uint8_t rate_parm;
 	uint8_t rate_len;
-	uint8_t rate[16];
-};
+	uint64_t rate;
+}__attribute__((packed));
